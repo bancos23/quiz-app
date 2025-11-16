@@ -1,55 +1,117 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" data-theme="dark">
 <head th:replace="~{fragments :: commonHead('Register - Quiz App')}"></head>
 
-<body class="min-h-screen bg-base-200 flex items-center justify-center" data-theme="dark">
+<body class="min-h-screen bg-base-200 flex items-center justify-center">
 
-<div class="w-full max-w-md p-4">
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
+<div class="w-full max-w-md">
+    <div class="card bg-base-100 card-border border-base-300 card-sm overflow-hidden shadow-xl">
+        <!-- Header strip -->
+        <div class="border-base-300 border-b border-dashed">
+            <div class="flex items-center gap-2 p-5">
+                <div class="grow">
+                    <div class="flex items-center gap-2 text-sm font-medium">
+                        <!-- User-plus icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                             viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                             class="size-5 opacity-40">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 9.75-3.75M18 14.25v4.5M20.25 16.5h-4.5" />
+                        </svg>
+                        Create a new account
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <h2 class="card-title text-center mb-4 justify-center">Create an Account</h2>
-
-            <div th:if="${registrationError}" class="alert alert-error mb-4">
+        <div class="card-body gap-4">
+            <!-- Error alert (auto-hide) -->
+            <div th:if="${registrationError}" class="alert alert-error" data-auto-hide>
                 <span th:text="${registrationError}">Error</span>
             </div>
 
-            <form th:action="@{/register}" th:object="${registerForm}" method="post" class="space-y-3">
-
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Username</span>
-                    </div>
-                    <input th:field="*{username}" class="input input-bordered w-full">
-                </label>
-
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Email</span>
-                    </div>
-                    <input th:field="*{email}" class="input input-bordered w-full">
-                </label>
-
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Password</span>
-                    </div>
-                    <input type="password" th:field="*{password}" class="input input-bordered w-full">
-                </label>
-
-                <button type="submit" class="btn btn-success w-full mt-2">
-                    Register
-                </button>
-            </form>
-
-            <p class="mt-4 text-center text-sm">
-                Already have an account?
-                <a th:href="@{/login}" class="link link-primary">Login</a>
+            <p class="text-xs opacity-60">
+                Registration is free and only takes a moment.
             </p>
 
+            <!-- Register form -->
+            <form th:action="@{/register}" th:object="${registerForm}" method="post" class="flex flex-col gap-3">
+
+                <!-- Username -->
+                <div class="flex flex-col gap-1 w-full">
+                    <label class="input input-border flex w-full items-center gap-2">
+                        <!-- User icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                             fill="currentColor" class="h-4 w-4 opacity-70">
+                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
+                        </svg>
+                        <input th:field="*{username}" type="text" class="grow"
+                               placeholder="Username" />
+                    </label>
+                </div>
+
+                <!-- Email -->
+                <div class="flex flex-col gap-1 w-full">
+                    <label class="input input-border flex w-full items-center gap-2">
+                        <!-- Mail icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                             fill="currentColor" class="h-4 w-4 opacity-70">
+                            <path d="M1.5 4.75A2.25 2.25 0 0 1 3.75 2.5h8.5A2.25 2.25 0 0 1 14.5 4.75v6.5a2.25 2.25 0 0 1-2.25 2.25h-8.5A2.25 2.25 0 0 1 1.5 11.25v-6.5Zm2.55-.75a.75.75 0 0 0-.53 1.28l4 4a.75.75 0 0 0 1.06 0l4-4a.75.75 0 1 0-1.06-1.06L8 7.94 4.61 3.97a.75.75 0 0 0-.56-.22Z" />
+                        </svg>
+                        <input th:field="*{email}" type="email" class="grow"
+                               placeholder="Email" />
+                    </label>
+                </div>
+
+                <!-- Password -->
+                <div class="flex flex-col gap-1 w-full">
+                    <label class="input input-border flex w-full items-center gap-2">
+                        <!-- Lock icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                             fill="currentColor" class="h-4 w-4 opacity-70">
+                            <path fill-rule="evenodd"
+                                  d="M8 1.75A3.25 3.25 0 0 0 4.75 5v1H4A1.75 1.75 0 0 0 2.25 7.75v5.5C2.25 14.55 3.2 15.5 4.44 15.5h7.12a2.19 2.19 0 0 0 2.19-2.25v-5.5A1.75 1.75 0 0 0 11.5 6h-.75V5A3.25 3.25 0 0 0 8 1.75Zm-1.75 3.25A1.75 1.75 0 0 1 8 3.25 1.75 1.75 0 0 1 9.75 5v1h-3.5V5Z"
+                                  clip-rule="evenodd" />
+                        </svg>
+                        <input th:field="*{password}" type="password" class="grow"
+                               placeholder="Password" />
+                    </label>
+                    <span class="text-[0.6875rem] text-base-content/60 px-1">
+                        Password should be at least 8 characters.
+                    </span>
+                </div>
+
+                <!-- Actions -->
+                <div class="card-actions mt-2">
+                    <button type="submit" class="btn btn-success w-full">
+                        Register
+                    </button>
+                </div>
+
+            </form>
+
+            <!-- Link to login, matching the login page style -->
+            <p class="mt-2 text-xs text-center opacity-70">
+                Already have an account?
+                <a th:href="@{/login}" class="link link-primary text-xs">
+                    Login here
+                </a>
+            </p>
         </div>
     </div>
 </div>
+
+<!-- Auto-hide alerts (same as login) -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("[data-auto-hide]").forEach(alert => {
+            setTimeout(() => {
+                alert.classList.add("opacity-0", "transition-all", "duration-700");
+                setTimeout(() => alert.remove(), 700);
+            }, 3500); // 3.5 seconds
+        });
+    });
+</script>
 
 </body>
 </html>

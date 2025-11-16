@@ -1,53 +1,104 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" data-theme="dark">
 <head th:replace="~{fragments :: commonHead('Login - Quiz App')}"></head>
 
-<body class="min-h-screen bg-base-200 flex items-center justify-center" data-theme="dark">
+<body class="min-h-screen bg-base-200 flex items-center justify-center">
 
+<div class="w-full max-w-md">
+    <div class="card bg-base-100 card-border border-base-300 card-sm overflow-hidden shadow-xl">
+        <div class="border-base-300 border-b border-dashed">
+            <div class="flex items-center gap-2 p-5">
+                <div class="grow">
+                    <div class="flex items-center gap-2 text-sm font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                             viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                             class="size-5 opacity-40">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 15 0v.75H4.5v-.75Z" />
+                        </svg>
+                        Authentication
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<div class="card mx-auto w-full max-w-5xl  shadow-xl">
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-
-            <h2 class="card-title text-center mb-4 justify-center">Login</h2>
-
-            <div th:if="${loginError}" class="alert alert-error mb-4">
+        <div class="card-body gap-4">
+            <div th:if="${loginError}" class="alert alert-error" data-auto-hide>
                 <span th:text="${loginError}">Invalid credentials</span>
             </div>
 
-            <div th:if="${infoMessage}" class="alert alert-success mb-4">
+            <div th:if="${infoMessage}" class="alert alert-success" data-auto-hide>
                 <span th:text="${infoMessage}">Registration successful</span>
             </div>
 
-            <form th:action="@{/login}" th:object="${loginForm}" method="post" class="space-y-3">
+            <p class="text-xs opacity-60">
+                Enter your username and password to continue.
+            </p>
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Username</span>
-                    </div>
-                    <input th:field="*{username}" type="text" class="input input-bordered w-full focus:outline-none focus:ring-0 focus:border-base-200">
-                </label>
+            <!-- Login form -->
+            <form th:action="@{/login}" th:object="${loginForm}" method="post" class="flex flex-col gap-3">
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Password</span>
-                    </div>
-                    <input th:field="*{password}" type="password" class="input input-bordered w-full focus:outline-none focus:ring-0 focus:border-base-200">
-                </label>
+                <!-- Username -->
+                <div class="flex flex-col gap-1 w-full">
+                    <label class="input input-border flex w-full items-center gap-2">
+                        <!-- User icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                             fill="currentColor" class="h-4 w-4 opacity-70">
+                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
+                        </svg>
+                        <input th:field="*{username}" type="text" class="grow"
+                               placeholder="Username" />
+                    </label>
+                </div>
 
-                <button type="submit" class="btn btn-primary w-full mt-2">
-                    Login
-                </button>
+                <!-- Password -->
+                <div class="flex flex-col gap-1 w-full">
+                    <label class="input input-border flex w-full items-center gap-2">
+                        <!-- Lock icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                             fill="currentColor" class="h-4 w-4 opacity-70">
+                            <path fill-rule="evenodd"
+                                  d="M8 1.75A3.25 3.25 0 0 0 4.75 5v1H4A1.75 1.75 0 0 0 2.25 7.75v5.5C2.25 14.55 3.2 15.5 4.44 15.5h7.12a2.19 2.19 0 0 0 2.19-2.25v-5.5A1.75 1.75 0 0 0 11.5 6h-.75V5A3.25 3.25 0 0 0 8 1.75Zm-1.75 3.25A1.75 1.75 0 0 1 8 3.25 1.75 1.75 0 0 1 9.75 5v1h-3.5V5Z"
+                                  clip-rule="evenodd" />
+                        </svg>
+                        <input th:field="*{password}" type="password" class="grow"
+                               placeholder="Password" />
+                    </label>
+                </div>
+
+                <!-- Actions -->
+                <div class="card-actions mt-2">
+                    <button type="submit" class="btn btn-primary w-full">
+                        Login
+                    </button>
+                </div>
+
             </form>
 
-            <p class="mt-4 text-center text-sm">
-                No account?
-                <a th:href="@{/register}" class="link link-primary">Register here</a>
+            <!-- Register link as subtle text -->
+            <p class="mt-2 text-xs text-center opacity-70">
+                Don’t have an account?
+                <a th:href="@{/register}" class="link link-primary text-xs">
+                    Register here
+                </a>
             </p>
 
         </div>
     </div>
 </div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("[data-auto-hide]").forEach(alert => {
+            setTimeout(() => {
+                alert.classList.add("opacity-0", "transition-all", "duration-700");
+                setTimeout(() => alert.remove(), 700);
+            }, 5 * 1000);
+        });
+    });
+</script>
+
 
 </body>
 </html>

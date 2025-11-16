@@ -5,10 +5,6 @@
 <body class="min-h-screen bg-base-200 flex items-start justify-center pt-10">
 
 <div class="w-full max-w-xl">
-
-    <!-- Nicer, subtle header only on home -->
-    <header th:replace="~{fragments :: mainHeader}"></header>
-
     <div class="card bg-base-100 shadow-xl">
         <div class="card-body text-center">
 
@@ -16,18 +12,15 @@
 
             <!-- Logged in -->
             <div th:if="${session.username}">
-
-                <div class="avatar avatar-online">
-                    <div class="w-24 rounded-full">
-                        <img src="https://img.daisyui.com/images/profile/demo/gordon@192.webp" />
-                    </div>
-                </div>
-
                 <p class="text-lg font-semibold mb-1">
                     Hello, <span th:text="${session.username}">User</span>!
                 </p>
-                <p class="text-sm text-gray-500 mb-4">
+                <p class="text-sm opacity-70 mb-4">
                     Role: <span th:text="${session.role}">user</span>
+                </p>
+
+                <p class="opacity-70 mb-4">
+                    Soon you’ll see your quizzes, stats and recent activity here.
                 </p>
 
                 <a th:href="@{/logout}" class="btn btn-error w-full">
@@ -37,16 +30,17 @@
 
             <!-- Not logged in -->
             <div th:if="${session.username == null}">
-                <p class="mb-4">You are not logged in.</p>
-                <div class="flex gap-2">
-                    <a th:href="@{/login}" class="btn btn-primary flex-1">Login</a>
-                    <a th:href="@{/register}" class="btn btn-success flex-1">Register</a>
-                </div>
+                <p class="opacity-70 mb-2">Welcome to Quiz App!</p>
+                <p class="opacity-60 text-sm">
+                    Use the bar at the bottom to login or register and start playing.
+                </p>
             </div>
 
         </div>
     </div>
 </div>
+
+<footer th:replace="~{fragments :: dockNav}"></footer>
 
 </body>
 </html>
