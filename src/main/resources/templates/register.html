@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: commonHead('Register - Quiz App')}"></head>
+
+<body class="min-h-screen bg-base-200 flex items-center justify-center" data-theme="dark">
+
+<div class="w-full max-w-md p-4">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+
+            <h2 class="card-title text-center mb-4 justify-center">Create an Account</h2>
+
+            <div th:if="${registrationError}" class="alert alert-error mb-4">
+                <span th:text="${registrationError}">Error</span>
+            </div>
+
+            <form th:action="@{/register}" th:object="${registerForm}" method="post" class="space-y-3">
+
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text">Username</span>
+                    </div>
+                    <input th:field="*{username}" class="input input-bordered w-full">
+                </label>
+
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text">Email</span>
+                    </div>
+                    <input th:field="*{email}" class="input input-bordered w-full">
+                </label>
+
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text">Password</span>
+                    </div>
+                    <input type="password" th:field="*{password}" class="input input-bordered w-full">
+                </label>
+
+                <button type="submit" class="btn btn-success w-full mt-2">
+                    Register
+                </button>
+            </form>
+
+            <p class="mt-4 text-center text-sm">
+                Already have an account?
+                <a th:href="@{/login}" class="link link-primary">Login</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

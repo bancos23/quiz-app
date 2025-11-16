@@ -4,7 +4,7 @@ import com.example.quiz_app.model.User;
 import com.example.quiz_app.model.Role;
 import com.example.quiz_app.repository.UserRepository;
 import com.example.quiz_app.repository.RoleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,54 +13,50 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
     public UserService(UserRepository userRepository,
-                       RoleRepository roleRepository) {
+                        RoleRepository roleRepository,
+                        PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    public User registerUser(User user) {
-        // Normalize role assignment: allow client to specify role by id or name, otherwise default to 'user'
-        Role resolved = null;
-        if (user.getRole() != null) {
-            Role provided = user.getRole();
-            if (provided.getId() != null) {
-                resolved = roleRepository.findById(provided.getId()).orElse(null);
-            }
-            if (resolved == null && provided.getName() != null) {
-                resolved = roleRepository.findByNameIgnoreCase(provided.getName());
-            }
+    public User registerUser(String username, String rawPassword, String email) {
+        if (userRepository.findByUsername(username) != null) {
+            throw new IllegalArgumentException("Username already exists");
         }
-        if (resolved == null) {
-            resolved = roleRepository.findByNameIgnoreCase("user");
-            if (resolved == null) {
-                resolved = roleRepository.save(new Role("user"));
-            }
+        if (userRepository.findByEmail(email) != null) {
+            throw new IllegalArgumentException("Email already exists");
         }
-        user.setRole(resolved);
+
+        Role userRole = roleRepository.findByNameIgnoreCase("user");
+        if (userRole == null) {
+            userRole = roleRepository.save(new Role("user"));
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setEmail(email);
+        user.setRole(userRole);
 
         return userRepository.save(user);
     }
 
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
-
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
     public List<User> getAllUsers() {
-        return userRepository.findAll(); // @EntityGraph ensures roles are eagerly loaded
+        return userRepository.findAll();
     }
 
     public User authenticate(String username, String rawPassword) {
         User user = userRepository.findByUsername(username);
-        if (user != null && user.getPassword() != null && user.getPassword().equals(rawPassword)) {
-            return user;
-        }
-        return null;
+        if (user == null)
+            return null;
+
+        if (!passwordEncoder.matches(rawPassword, user.getPassword()))
+            return null;
+
+        return user;
     }
 }

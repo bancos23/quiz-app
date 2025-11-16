@@ -18,9 +18,8 @@ public class DataSeederConfig {
 
     private void ensureRole(RoleRepository roles, String name) {
         Role existing = roles.findByNameIgnoreCase(name);
-        if (existing == null) {
-            Role created = roles.save(new Role(name));
-        }
+        if (existing == null)
+            roles.save(new Role(name));
     }
 }
 

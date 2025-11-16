@@ -2,26 +2,21 @@ package com.example.quiz_app.model;
 
 import jakarta.persistence.*;
 import java.util.Set;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "roles")
-@JsonIgnoreProperties({"users"})
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "role")
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     private Set<User> users;
 
-    public Role() {
-    }
-
-    // Constructor corrected from "Roles" to "Role"
+    public Role() { }
     public Role(String name) {
         this.name = name;
     }

@@ -1,6 +1,5 @@
 package com.example.quiz_app.repository;
 
-import com.example.quiz_app.model.Role;
 import com.example.quiz_app.model.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +10,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User findByUsername(String username);
     User findByEmail(String email);
 
+    @Override
     @EntityGraph(attributePaths = {"role"})
     List<User> findAll();
 }

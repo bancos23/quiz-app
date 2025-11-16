@@ -2,7 +2,6 @@ package com.example.quiz_app.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
@@ -12,23 +11,20 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
-    @NotBlank(message = "Username is mandatory")
+    @Column(unique = true, nullable = false)
     private String username;
 
     @Column
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @NotBlank(message = "Password is mandatory")
     private String password;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     @Email(message = "Email should be valid")
-    @NotBlank(message = "Email is mandatory")
     private String email;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id")
-    private Role role; // e.g., "STUDENT", "ADMIN"
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     public User() {}
 
