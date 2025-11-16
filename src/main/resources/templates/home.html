@@ -10,7 +10,6 @@
 
             <h2 class="card-title mb-4 justify-center">Welcome</h2>
 
-            <!-- Logged in -->
             <div th:if="${session.username}">
                 <p class="text-lg font-semibold mb-1">
                     Hello, <span th:text="${session.username}">User</span>!
@@ -28,7 +27,6 @@
                 </a>
             </div>
 
-            <!-- Not logged in -->
             <div th:if="${session.username == null}">
                 <p class="opacity-70 mb-2">Welcome to Quiz App!</p>
                 <p class="opacity-60 text-sm">

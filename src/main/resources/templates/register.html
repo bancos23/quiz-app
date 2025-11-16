@@ -6,12 +6,10 @@
 
 <div class="w-full max-w-md">
     <div class="card bg-base-100 card-border border-base-300 card-sm overflow-hidden shadow-xl">
-        <!-- Header strip -->
         <div class="border-base-300 border-b border-dashed">
             <div class="flex items-center gap-2 p-5">
                 <div class="grow">
                     <div class="flex items-center gap-2 text-sm font-medium">
-                        <!-- User-plus icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                              viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                              class="size-5 opacity-40">
@@ -25,7 +23,6 @@
         </div>
 
         <div class="card-body gap-4">
-            <!-- Error alert (auto-hide) -->
             <div th:if="${registrationError}" class="alert alert-error" data-auto-hide>
                 <span th:text="${registrationError}">Error</span>
             </div>
@@ -34,13 +31,10 @@
                 Registration is free and only takes a moment.
             </p>
 
-            <!-- Register form -->
             <form th:action="@{/register}" th:object="${registerForm}" method="post" class="flex flex-col gap-3">
 
-                <!-- Username -->
                 <div class="flex flex-col gap-1 w-full">
                     <label class="input input-border flex w-full items-center gap-2">
-                        <!-- User icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
                              fill="currentColor" class="h-4 w-4 opacity-70">
                             <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
@@ -50,10 +44,8 @@
                     </label>
                 </div>
 
-                <!-- Email -->
                 <div class="flex flex-col gap-1 w-full">
                     <label class="input input-border flex w-full items-center gap-2">
-                        <!-- Mail icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
                              fill="currentColor" class="h-4 w-4 opacity-70">
                             <path d="M1.5 4.75A2.25 2.25 0 0 1 3.75 2.5h8.5A2.25 2.25 0 0 1 14.5 4.75v6.5a2.25 2.25 0 0 1-2.25 2.25h-8.5A2.25 2.25 0 0 1 1.5 11.25v-6.5Zm2.55-.75a.75.75 0 0 0-.53 1.28l4 4a.75.75 0 0 0 1.06 0l4-4a.75.75 0 1 0-1.06-1.06L8 7.94 4.61 3.97a.75.75 0 0 0-.56-.22Z" />
@@ -63,10 +55,8 @@
                     </label>
                 </div>
 
-                <!-- Password -->
                 <div class="flex flex-col gap-1 w-full">
                     <label class="input input-border flex w-full items-center gap-2">
-                        <!-- Lock icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
                              fill="currentColor" class="h-4 w-4 opacity-70">
                             <path fill-rule="evenodd"
@@ -81,16 +71,13 @@
                     </span>
                 </div>
 
-                <!-- Actions -->
                 <div class="card-actions mt-2">
                     <button type="submit" class="btn btn-success w-full">
                         Register
                     </button>
                 </div>
-
             </form>
 
-            <!-- Link to login, matching the login page style -->
             <p class="mt-2 text-xs text-center opacity-70">
                 Already have an account?
                 <a th:href="@{/login}" class="link link-primary text-xs">
@@ -101,14 +88,13 @@
     </div>
 </div>
 
-<!-- Auto-hide alerts (same as login) -->
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("[data-auto-hide]").forEach(alert => {
             setTimeout(() => {
                 alert.classList.add("opacity-0", "transition-all", "duration-700");
                 setTimeout(() => alert.remove(), 700);
-            }, 3500); // 3.5 seconds
+            }, 5 * 1000);
         });
     });
 </script>
