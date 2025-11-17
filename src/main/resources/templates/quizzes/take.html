@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-theme="dark">
+<head th:replace="~{fragments :: commonHead(${'Take Quiz - ' + quiz.title})}"></head>
+
+<body class="min-h-screen bg-base-200 flex items-start justify-center pt-10">
+
+<div class="w-full max-w-3xl">
+    <div class="card bg-base-100 shadow-xl mb-4">
+        <div class="card-body">
+            <h1 class="card-title" th:text="${quiz.title}">Quiz Title</h1>
+            <p class="opacity-70 mb-2" th:text="${quiz.description}">
+                Quiz description...
+            </p>
+            <p class="text-sm opacity-60">
+                Questions: <span th:text="${#lists.size(quiz.questions)}">0</span>
+            </p>
+        </div>
+    </div>
+
+    <form th:action="@{|/quizzes/${quiz.id}|}" method="post" class="space-y-4">
+        <div th:each="q, qStat : ${quiz.questions}" class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="flex items-start gap-2 mb-2">
+                    <span class="font-semibold">
+                        <span th:text="${qStat.index + 1}">1</span>.
+                    </span>
+                    <p class="font-medium" th:text="${q.text}">Question text...</p>
+                </div>
+
+                <!-- SINGLE_CHOICE -->
+                <div th:if="${q.type == T(com.example.quiz_app.model.Question.QuestionType).SINGLE_CHOICE}"
+                     class="space-y-2">
+                    <label th:each="opt : ${q.options}" class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio"
+                               th:name="|answers[${q.id}]|"
+                               th:value="${opt.id}"
+                               class="radio radio-primary" />
+                        <span th:text="${opt.text}">Option text</span>
+                    </label>
+                </div>
+
+                <!-- MULTIPLE_CHOICE -->
+                <div th:if="${q.type == T(com.example.quiz_app.model.Question.QuestionType).MULTIPLE_CHOICE}"
+                     class="space-y-2">
+                    <p class="text-xs opacity-60 mb-1">You can select more than one answer.</p>
+                    <label th:each="opt : ${q.options}" class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox"
+                               th:name="|answers[${q.id}]|"
+                               th:value="${opt.id}"
+                               class="checkbox checkbox-primary" />
+                        <span th:text="${opt.text}">Option text</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 flex justify-end">
+            <button type="submit" class="btn btn-primary">
+                Submit Answers
+            </button>
+        </div>
+    </form>
+
+</div>
+
+<footer th:replace="~{fragments :: dockNav}"></footer>
+
+</body>
+</html>

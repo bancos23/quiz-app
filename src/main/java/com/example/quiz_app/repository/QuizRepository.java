@@ -9,10 +9,4 @@ import java.util.List;
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
     List<Quiz> findByPublished(boolean published);
-
-    @EntityGraph(attributePaths = {"questions", "questions.options"})
-    List<Quiz> findAll();
-
-    @EntityGraph(attributePaths = {"questions", "questions.options" })
-    Quiz findById(long id);
 }

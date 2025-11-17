@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-theme="dark">
+<head th:replace="~{fragments :: commonHead('Create Quiz - Quiz App')}"></head>
+
+<body class="min-h-screen bg-base-200 flex items-start justify-center pt-10">
+
+<div class="w-full max-w-xl">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h1 class="card-title mb-2">Create New Quiz</h1>
+            <p class="text-sm opacity-70 mb-4">
+                Enter the basic information for the quiz. You’ll add questions afterwards.
+            </p>
+
+            <form th:action="@{/admin/quizzes/create}" method="post" th:object="${quizForm}" class="space-y-4">
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Title</span>
+                    </label>
+                    <input type="text"
+                           th:field="*{title}"
+                           class="input input-bordered w-full"
+                           placeholder="Quiz title" required />
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Description</span>
+                    </label>
+                    <textarea th:field="*{description}"
+                              class="textarea textarea-bordered w-full"
+                              rows="3"
+                              placeholder="Short description of this quiz"></textarea>
+                </div>
+
+                <div class="form-control">
+                    <label class="label cursor-pointer flex justify-between">
+                        <span class="label-text">Published</span>
+                        <input type="checkbox"
+                               th:field="*{published}"
+                               class="toggle toggle-primary" />
+                    </label>
+                    <p class="text-xs opacity-60 mt-1">
+                        If not published, this quiz won’t appear in the public list.
+                    </p>
+                </div>
+
+                <div class="mt-4 flex justify-end gap-2">
+                    <a th:href="@{/quizzes}" class="btn btn-ghost">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        Create Quiz
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments :: dockNav}"></footer>
+
+</body>
+</html>

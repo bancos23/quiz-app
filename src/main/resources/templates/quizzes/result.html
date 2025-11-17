@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-theme="dark">
+<head th:replace="~{fragments :: commonHead('Quiz Result - Quiz App')}"></head>
+
+<body class="min-h-screen bg-base-200 flex items-start justify-center pt-10">
+
+<div class="w-full max-w-3xl space-y-4">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body text-center">
+            <h1 class="card-title justify-center mb-2">Quiz Result</h1>
+            <p class="text-lg font-semibold" th:text="${quiz.title}">Quiz title</p>
+
+            <div class="mt-4">
+                <p class="text-3xl font-bold">
+                    <span th:text="${score}">0</span>
+                    /
+                    <span th:text="${total}">0</span>
+                </p>
+                <p class="text-sm opacity-70 mt-2">
+                    Correctly answered questions
+                </p>
+            </div>
+
+            <div class="mt-4">
+                <a th:href="@{/quizzes}" class="btn btn-outline">
+                    Back to Quizzes
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simple summary list of all questions (no per-answer breakdown for now) -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h2 class="card-title mb-2">Questions Overview</h2>
+            <ul class="space-y-3">
+                <li th:each="q, qStat : ${quiz.questions}">
+                    <span class="font-medium">
+                        <span th:text="${qStat.index + 1}">1</span>.
+                        <span th:text="${q.text}">Question text...</span>
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments :: dockNav}"></footer>
+
+</body>
+</html>

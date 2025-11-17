@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" data-theme="dark">
+<head th:replace="~{fragments :: commonHead(${'Manage Questions - ' + quiz.title})}"></head>
+
+<body class="min-h-screen bg-base-200 flex items-start justify-center pt-10">
+
+<div class="w-full max-w-3xl space-y-6">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h1 class="card-title mb-2" th:text="${quiz.title}">Quiz Title</h1>
+            <p class="opacity-70" th:text="${quiz.description}">Quiz description...</p>
+
+            <div class="mt-3 flex justify-between items-center text-sm opacity-70">
+                <span>
+                    Questions: <span th:text="${#lists.size(quiz.questions)}">0</span>
+                </span>
+                <a th:href="@{/admin/quizzes}" class="link link-hover">Back to admin list</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- List existing questions -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h2 class="card-title mb-3">Existing Questions</h2>
+
+            <div th:if="${#lists.isEmpty(quiz.questions)}" class="opacity-70">
+                No questions yet. Add one below.
+            </div>
+
+            <ol th:if="${!#lists.isEmpty(quiz.questions)}" class="list-decimal pl-5 space-y-2">
+                <li th:each="q : ${quiz.questions}">
+                    <div class="flex flex-col gap-1">
+                        <div class="flex justify-between items-center">
+                            <span>
+                                <span class="font-medium" th:text="${q.text}">Question text</span>
+                                <span class="badge badge-outline ml-2 text-xs"
+                                      th:text="${q.type}">SINGLE_CHOICE</span>
+                            </span>
+                            <a th:href="@{|/admin/quizzes/${quiz.id}/questions/${q.id}/options|}"
+                               class="btn btn-xs btn-outline">
+                                Manage options
+                            </a>
+                        </div>
+                    </div>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Add new question -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h2 class="card-title mb-3">Add New Question</h2>
+
+            <form th:action="@{|/admin/quizzes/${quiz.id}/questions|}"
+                  th:object="${questionForm}"
+                  method="post"
+                  class="space-y-4">
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Question text</span>
+                    </label>
+                    <textarea th:field="*{text}"
+                              class="textarea textarea-bordered w-full"
+                              rows="2"
+                              placeholder="Enter question text"
+                              required></textarea>
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Question type</span>
+                    </label>
+                    <select th:field="*{type}" class="select select-bordered w-full">
+                        <option value="SINGLE_CHOICE">Single choice</option>
+                        <option value="MULTIPLE_CHOICE">Multiple choice</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit" class="btn btn-primary">
+                        Add Question
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments :: dockNav}"></footer>
+
+</body>
+</html>

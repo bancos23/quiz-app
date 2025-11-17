@@ -115,6 +115,6 @@ public class AuthController {
 
     @GetMapping("/")
     public String home() {
-        return "home"; // templates/home.html
+        return "redirect:/quizzes"; // templates/home.html
     }
 }
