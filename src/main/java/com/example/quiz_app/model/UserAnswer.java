@@ -22,18 +22,39 @@ public class UserAnswer {
     @JoinColumn(name = "answer_option_id")
     private AnswerOption selectedOption;
 
-    public UserAnswer() { }
+    public UserAnswer() {
+    }
 
     // getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public QuizAttempt getAttempt() { return attempt; }
-    public void setAttempt(QuizAttempt attempt) { this.attempt = attempt; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Question getQuestion() { return question; }
-    public void setQuestion(Question question) { this.question = question; }
+    public QuizAttempt getAttempt() {
+        return attempt;
+    }
 
-    public AnswerOption getSelectedOption() { return selectedOption; }
-    public void setSelectedOption(AnswerOption selectedOption) { this.selectedOption = selectedOption; }
+    public void setAttempt(QuizAttempt attempt) {
+        this.attempt = attempt;
+    }
+
+    public Question getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(Question question) {
+        this.question = question;
+    }
+
+    public AnswerOption getSelectedOption() {
+        return selectedOption;
+    }
+
+    public void setSelectedOption(AnswerOption selectedOption) {
+        this.selectedOption = selectedOption;
+    }
 }

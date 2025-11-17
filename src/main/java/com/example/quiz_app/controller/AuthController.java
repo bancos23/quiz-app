@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class AuthController {
     private final UserService userService;
+
     public AuthController(UserService userService) {
         this.userService = userService;
     }
@@ -23,15 +24,33 @@ public class AuthController {
         private String username;
         @NotBlank
         private String password;
-        @NotBlank @Email
+        @NotBlank
+        @Email
         private String email;
 
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
     }
 
     public static class LoginForm {
@@ -40,10 +59,21 @@ public class AuthController {
         @NotBlank
         private String password;
 
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
     }
 
     @GetMapping("/register")
@@ -74,8 +104,7 @@ public class AuthController {
 
     @GetMapping("/login")
     public String loginPage(Model model,
-                            @RequestParam(value = "registered", required = false) String registered)
-    {
+                            @RequestParam(value = "registered", required = false) String registered) {
         model.addAttribute("loginForm", new LoginForm());
         if (registered != null) {
             model.addAttribute("message", "Registration successful! Please log in.");
@@ -102,7 +131,7 @@ public class AuthController {
 
         session.setAttribute("userId", user.getId());
         session.setAttribute("username", user.getUsername());
-        session.setAttribute("role",  user.getRole() != null ? user.getRole().getName() : null);
+        session.setAttribute("role", user.getRole() != null ? user.getRole().getName() : null);
 
         return "redirect:/";
     }

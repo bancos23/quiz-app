@@ -8,15 +8,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class AdminInterceptor implements HandlerInterceptor {
 
     @Override
-    public boolean preHandle(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Object handler
-    ) throws Exception {
-
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession(false);
 
-        // No session or no role → block
         if (session == null) {
             response.sendRedirect("/");
             return false;
@@ -34,7 +28,6 @@ public class AdminInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        // OK, user is admin → proceed
         return true;
     }
 }

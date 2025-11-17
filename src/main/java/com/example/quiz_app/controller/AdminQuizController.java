@@ -38,14 +38,29 @@ public class AdminQuizController {
 
         private boolean published;
 
-        public String getTitle() { return title; }
-        public void setTitle(String title) { this.title = title; }
+        public String getTitle() {
+            return title;
+        }
 
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
+        public void setTitle(String title) {
+            this.title = title;
+        }
 
-        public boolean isPublished() { return published; }
-        public void setPublished(boolean published) { this.published = published; }
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public boolean isPublished() {
+            return published;
+        }
+
+        public void setPublished(boolean published) {
+            this.published = published;
+        }
     }
 
     public static class QuestionForm {
@@ -55,11 +70,21 @@ public class AdminQuizController {
         @NotBlank
         private String type;
 
-        public String getText() { return text; }
-        public void setText(String text) { this.text = text; }
+        public String getText() {
+            return text;
+        }
 
-        public String getType() { return type; }
-        public void setType(String type) { this.type = type; }
+        public void setText(String text) {
+            this.text = text;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
     }
 
     public static class OptionForm {
@@ -68,11 +93,21 @@ public class AdminQuizController {
 
         private boolean correct = false;
 
-        public String getText() { return text; }
-        public void setText(String text) { this.text = text; }
+        public String getText() {
+            return text;
+        }
 
-        public boolean isCorrect() { return correct; }
-        public void setCorrect(boolean correct) { this.correct = correct; }
+        public void setText(String text) {
+            this.text = text;
+        }
+
+        public boolean isCorrect() {
+            return correct;
+        }
+
+        public void setCorrect(boolean correct) {
+            this.correct = correct;
+        }
     }
 
     @GetMapping
@@ -84,40 +119,24 @@ public class AdminQuizController {
     }
 
     @GetMapping("/create")
-    public String showCreateForm(Model model, HttpSession session) {
+    public String showCreateForm(Model model) {
         model.addAttribute("quizForm", new QuizForm());
         return "quizzes/create"; // templates/quizzes/create.html
     }
 
     @PostMapping("/create")
-    public String handleCreate(
-            @Valid @ModelAttribute("quizForm") QuizForm form,
-            BindingResult bindingResult,
-            HttpSession session,
-            Model model
-    ) {
-        if (bindingResult.hasErrors()) {
-            return "quizzes/create";
-        }
+    public String handleCreate(@Valid @ModelAttribute("quizForm") QuizForm form, BindingResult bindingResult, HttpSession session) {
+        if (bindingResult.hasErrors()) return "quizzes/create";
 
         Long userId = (Long) session.getAttribute("userId");
 
-        quizService.createQuiz(
-                form.getTitle(),
-                form.getDescription(),
-                form.isPublished(),
-                userId
-        );
+        quizService.createQuiz(form.getTitle(), form.getDescription(), form.isPublished(), userId);
 
         return "redirect:/quizzes";
     }
 
     @GetMapping("/{quizId}/questions")
-    public String showQuestions(
-            @PathVariable Long quizId,
-            Model model,
-            HttpSession session
-    ) {
+    public String showQuestions(@PathVariable Long quizId, Model model) {
         Quiz quiz = quizService.getQuizWithQuestions(quizId);
         model.addAttribute("quiz", quiz);
         model.addAttribute("questionForm", new QuestionForm());
@@ -125,13 +144,7 @@ public class AdminQuizController {
     }
 
     @PostMapping("/{quizId}/questions")
-    public String addQuestion(
-            @PathVariable Long quizId,
-            @Valid @ModelAttribute("questionForm") QuestionForm form,
-            BindingResult bindingResult,
-            HttpSession session,
-            Model model
-    ) {
+    public String addQuestion(@PathVariable Long quizId, @Valid @ModelAttribute("questionForm") QuestionForm form, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             Quiz quiz = quizService.getQuizWithQuestions(quizId);
             model.addAttribute("quiz", quiz);
@@ -145,12 +158,7 @@ public class AdminQuizController {
     }
 
     @GetMapping("/{quizId}/questions/{questionId}/options")
-    public String manageOptions(
-            @PathVariable Long quizId,
-            @PathVariable Long questionId,
-            HttpSession session,
-            Model model
-    ) {
+    public String manageOptions(@PathVariable Long quizId, @PathVariable Long questionId, Model model) {
         Question question = questionRepository.findById(questionId).orElseThrow(/* ignore */);
 
         model.addAttribute("quizId", quizId);
@@ -160,20 +168,8 @@ public class AdminQuizController {
         return "quizzes/admin-options";
     }
 
-
-    /**
-     * POST /admin/quizzes/{quizId}/questions/{questionId}/options
-     * Add a new answer option to a question.
-     */
     @PostMapping("/{quizId}/questions/{questionId}/options")
-    public String addOption(
-            @PathVariable Long quizId,
-            @PathVariable Long questionId,
-            @Valid @ModelAttribute("optionForm") OptionForm form,
-            BindingResult bindingResult,
-            HttpSession session,
-            Model model
-    ) {
+    public String addOption(@PathVariable Long quizId, @PathVariable Long questionId, @Valid @ModelAttribute("optionForm") OptionForm form, BindingResult bindingResult, Model model) {
         Question question = questionRepository.findById(questionId).orElseThrow(/* ignore */);
 
         if (bindingResult.hasErrors()) {
@@ -186,9 +182,6 @@ public class AdminQuizController {
         opt.setQuestion(question);
         opt.setText(form.getText());
         opt.setCorrect(form.isCorrect());
-
-        System.out.println("Saving option: text=" + form.getText() +
-                ", correct=" + form.isCorrect());
 
         answerOptionRepository.save(opt);
 

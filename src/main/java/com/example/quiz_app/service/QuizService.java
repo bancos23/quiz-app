@@ -82,9 +82,8 @@ public class QuizService {
                 userAnswers.add(userAnswer);
             }
 
-            if (isAnswerCorrect(q, selectedOptionIds)) {
+            if (isAnswerCorrect(q, selectedOptionIds))
                 score++;
-            }
         }
 
         attempt.setScore(score);
@@ -101,11 +100,9 @@ public class QuizService {
         Set<Long> selectedSet = new HashSet<>(selectedOptionIds);
 
         Set<Long> correctIds = new HashSet<>();
-        for (AnswerOption option : question.getOptions()) {
-            if (option.isCorrect()) {
+        for (AnswerOption option : question.getOptions())
+            if (option.isCorrect())
                 correctIds.add(option.getId());
-            }
-        }
 
         return selectedSet.equals(correctIds);
     }
@@ -128,7 +125,6 @@ public class QuizService {
         return attempt;
     }
 
-    // create getAllPublishedQuizzes
     @Transactional(readOnly = true)
     public List<Quiz> getAllPublishedQuizzes() {
         return quizRepository.findByPublished(true);
@@ -143,10 +139,8 @@ public class QuizService {
     public Quiz createQuiz(String title, String description, boolean published, Long createdByUserId) {
 
         User creator = null;
-        if (createdByUserId != null) {
-            creator = userRepository.findById(createdByUserId)
-                    .orElse(null);
-        }
+        if (createdByUserId != null)
+            creator = userRepository.findById(createdByUserId).orElse(null);
 
         Quiz quiz = new Quiz();
         quiz.setTitle(title);

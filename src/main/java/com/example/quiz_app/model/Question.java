@@ -1,6 +1,7 @@
 package com.example.quiz_app.model;
 
 import jakarta.persistence.*;
+
 import java.util.List;
 
 @Entity
@@ -30,21 +31,47 @@ public class Question {
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnswerOption> options;
 
-    public Question() { }
+    public Question() {
+    }
 
     // getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Quiz getQuiz() { return quiz; }
-    public void setQuiz(Quiz quiz) { this.quiz = quiz; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getText() { return text; }
-    public void setText(String text) { this.text = text; }
+    public Quiz getQuiz() {
+        return quiz;
+    }
 
-    public QuestionType getType() { return type; }
-    public void setType(QuestionType type) { this.type = type; }
+    public void setQuiz(Quiz quiz) {
+        this.quiz = quiz;
+    }
 
-    public List<AnswerOption> getOptions() { return options; }
-    public void setOptions(List<AnswerOption> options) { this.options = options; }
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public QuestionType getType() {
+        return type;
+    }
+
+    public void setType(QuestionType type) {
+        this.type = type;
+    }
+
+    public List<AnswerOption> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<AnswerOption> options) {
+        this.options = options;
+    }
 }
