@@ -75,46 +75,20 @@ public class AdminQuizController {
         public void setCorrect(boolean correct) { this.correct = correct; }
     }
 
-    // --- Helper: ensure user is admin ---
-    private boolean isAdmin(HttpSession session) {
-        String role = (String) session.getAttribute("role");
-        return role != null && role.equalsIgnoreCase("admin");
-    }
-
-    /**
-     * GET /admin/quizzes
-     * List all quizzes for admin (published + drafts)
-     */
     @GetMapping
-    public String adminListQuizzes(Model model, HttpSession session) {
-        if (!isAdmin(session)) {
-            return "redirect:/";
-        }
-
+    public String adminListQuizzes(Model model) {
         List<Quiz> quizzes = quizService.getAllQuizzes();
         model.addAttribute("quizzes", quizzes);
         model.addAttribute("isAdmin", true);
         return "quizzes/list";
     }
 
-    /**
-     * GET /admin/quizzes/create
-     * Show quiz creation form
-     */
     @GetMapping("/create")
     public String showCreateForm(Model model, HttpSession session) {
-        if (!isAdmin(session)) {
-            return "redirect:/";
-        }
-
         model.addAttribute("quizForm", new QuizForm());
         return "quizzes/create"; // templates/quizzes/create.html
     }
 
-    /**
-     * POST /admin/quizzes/create
-     * Handle quiz creation
-     */
     @PostMapping("/create")
     public String handleCreate(
             @Valid @ModelAttribute("quizForm") QuizForm form,
@@ -122,10 +96,6 @@ public class AdminQuizController {
             HttpSession session,
             Model model
     ) {
-        if (!isAdmin(session)) {
-            return "redirect:/";
-        }
-
         if (bindingResult.hasErrors()) {
             return "quizzes/create";
         }
@@ -139,34 +109,21 @@ public class AdminQuizController {
                 userId
         );
 
-        // after creation, go back to public quizzes list
         return "redirect:/quizzes";
     }
 
-    /**
-     * GET /admin/quizzes/{quizId}/questions
-     * Show quiz with its questions and a form to add a new question.
-     */
     @GetMapping("/{quizId}/questions")
     public String showQuestions(
             @PathVariable Long quizId,
             Model model,
             HttpSession session
     ) {
-        if (!isAdmin(session)) {
-            return "redirect:/";
-        }
-
         Quiz quiz = quizService.getQuizWithQuestions(quizId);
         model.addAttribute("quiz", quiz);
         model.addAttribute("questionForm", new QuestionForm());
         return "quizzes/admin-questions";
     }
 
-    /**
-     * POST /admin/quizzes/{quizId}/questions
-     * Add a new question to the quiz.
-     */
     @PostMapping("/{quizId}/questions")
     public String addQuestion(
             @PathVariable Long quizId,
@@ -175,10 +132,6 @@ public class AdminQuizController {
             HttpSession session,
             Model model
     ) {
-        if (!isAdmin(session)) {
-            return "redirect:/";
-        }
-
         if (bindingResult.hasErrors()) {
             Quiz quiz = quizService.getQuizWithQuestions(quizId);
             model.addAttribute("quiz", quiz);
@@ -191,29 +144,6 @@ public class AdminQuizController {
         return "redirect:/admin/quizzes/" + quizId + "/questions";
     }
 
-    /**
-     * GET /admin/quizzes/{quizId}/questions/{questionId}/options
-     * Show question with its options and a form to add new options.
-     */
-    /*@GetMapping("/{quizId}/questions/{questionId}/options")
-    public String showOptions(
-            @PathVariable Long quizId,
-            @PathVariable Long questionId,
-            HttpSession session,
-            Model model
-    ) {
-        if (!isAdmin(session)) {
-            return "redirect:/";
-        }
-
-        Question question = quizService.getQuestionWithOptions(questionId);
-        model.addAttribute("quizId", quizId);
-        model.addAttribute("question", question);
-        model.addAttribute("optionForm", new OptionForm());
-
-        return "quizzes/admin-options";
-    }*/
-
     @GetMapping("/{quizId}/questions/{questionId}/options")
     public String manageOptions(
             @PathVariable Long quizId,
@@ -221,11 +151,7 @@ public class AdminQuizController {
             HttpSession session,
             Model model
     ) {
-        if (!isAdmin(session)) {
-            return "redirect:/";
-        }
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new IllegalArgumentException("Question not found: " + questionId));
+        Question question = questionRepository.findById(questionId).orElseThrow(/* ignore */);
 
         model.addAttribute("quizId", quizId);
         model.addAttribute("question", question);
@@ -248,12 +174,7 @@ public class AdminQuizController {
             HttpSession session,
             Model model
     ) {
-        if (!isAdmin(session)) {
-            return "redirect:/";
-        }
-
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid question ID: " + questionId));
+        Question question = questionRepository.findById(questionId).orElseThrow(/* ignore */);
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("quizId", quizId);

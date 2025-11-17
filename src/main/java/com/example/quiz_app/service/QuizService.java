@@ -34,8 +34,7 @@ public class QuizService {
 
     @Transactional
     public Quiz getQuizForTaking(Long quizId) {
-        Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new NoSuchElementException("Quiz not found " + quizId));
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(/* ignore */);
 
         quiz.getQuestions().size();
         quiz.getQuestions().forEach(q -> q.getOptions().size());
@@ -48,11 +47,8 @@ public class QuizService {
 
     @Transactional
     public QuizAttempt submitAttempt(Long quizId, Long userId, Map<Long, List<Long>> answers) {
-        Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new IllegalArgumentException("Quiz not found: " + quizId));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(/* ignore */);
+        User user = userRepository.findById(userId).orElseThrow(/* ignore */);
 
         quiz.getQuestions().forEach(q -> q.getOptions().size());
 
@@ -70,9 +66,8 @@ public class QuizService {
                     answers.getOrDefault(questionId, Collections.emptyList());
 
             Map<Long, AnswerOption> optionsById = new HashMap<>();
-            for (AnswerOption option : q.getOptions()) {
+            for (AnswerOption option : q.getOptions())
                 optionsById.put(option.getId(), option);
-            }
 
             for (Long optionId : selectedOptionIds) {
                 AnswerOption option = optionsById.get(optionId);
@@ -122,10 +117,8 @@ public class QuizService {
 
     @Transactional(readOnly = true)
     public QuizAttempt getAttemptWithAnswers(Long attemptId) {
-        QuizAttempt attempt = quizAttemptRepository.findById(attemptId)
-                .orElseThrow(() -> new IllegalArgumentException("Attempt not found: " + attemptId));
+        QuizAttempt attempt = quizAttemptRepository.findById(attemptId).orElseThrow(/* ignore */);
 
-        // initialize lazy answers if needed
         attempt.getAnswers().size();
         attempt.getAnswers().forEach(a -> {
             a.getQuestion().getId();
@@ -165,17 +158,14 @@ public class QuizService {
 
     @Transactional
     public Quiz getQuizWithQuestions(Long quizId) {
-        Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new NoSuchElementException("Quiz not found: " + quizId));
-
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(/* ignore */);
         quiz.getQuestions().size();
         return quiz;
     }
 
     @Transactional
     public Question addQuestionToQuiz(Long quizId, String text, Question.QuestionType type) {
-        Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new NoSuchElementException("Quiz not found " + quizId));
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(/* ignore */);
 
         Question q = new Question();
         q.setQuiz(quiz);
@@ -187,16 +177,14 @@ public class QuizService {
 
     @Transactional(readOnly = true)
     public Question getQuestionWithOptions(Long questionId) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new NoSuchElementException("Question not found " + questionId));
+        Question question = questionRepository.findById(questionId).orElseThrow(/* ignore */);
         question.getOptions().size();
         return question;
     }
 
     @Transactional
     public AnswerOption addOptionToQuestion(Long questionId, String text, boolean correct) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new NoSuchElementException("Question not found " + questionId));
+        Question question = questionRepository.findById(questionId).orElseThrow(/* ignore */);
 
         AnswerOption option = new AnswerOption();
         option.setQuestion(question);
