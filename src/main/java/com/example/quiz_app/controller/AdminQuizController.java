@@ -5,11 +5,14 @@ import com.example.quiz_app.model.Quiz;
 import com.example.quiz_app.model.Question;
 import com.example.quiz_app.repository.AnswerOptionRepository;
 import com.example.quiz_app.repository.QuestionRepository;
+import com.example.quiz_app.repository.QuizRepository;
+import com.example.quiz_app.repository.UserAnswerRepository;
 import com.example.quiz_app.service.QuizService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -23,11 +26,15 @@ public class AdminQuizController {
     private final QuizService quizService;
     private final QuestionRepository questionRepository;
     private final AnswerOptionRepository answerOptionRepository;
+    private final QuizRepository quizRepository;
+    private final UserAnswerRepository userAnswerRepository;
 
-    public AdminQuizController(QuizService quizService, QuestionRepository questionRepository, AnswerOptionRepository answerOptionRepository) {
+    public AdminQuizController(QuizService quizService, QuestionRepository questionRepository, AnswerOptionRepository answerOptionRepository, QuizRepository quizRepository, UserAnswerRepository userAnswerRepository) {
         this.quizService = quizService;
         this.questionRepository = questionRepository;
         this.answerOptionRepository = answerOptionRepository;
+        this.quizRepository = quizRepository;
+        this.userAnswerRepository = userAnswerRepository;
     }
 
     public static class QuizForm {
@@ -186,5 +193,64 @@ public class AdminQuizController {
         answerOptionRepository.save(opt);
 
         return "redirect:/admin/quizzes/" + quizId + "/questions/" + questionId + "/options";
+    }
+
+    @PostMapping("/{quizId}/toggle-publish")
+    public String togglePublishQuiz(@PathVariable Long quizId, Model model) {
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow();
+        quiz.setPublished(!quiz.isPublished());
+        quizRepository.save(quiz);
+        return "redirect:/admin/quizzes/" + quizId + "/questions";
+    }
+
+    @PostMapping("/{quizId}/questions/{questionId}/options/{optionId}/toggle")
+    public String toggleOptionCorrectness(@PathVariable Long quizId,
+                                          @PathVariable Long questionId,
+                                          @PathVariable Long optionId) {
+        AnswerOption option = answerOptionRepository.findById(optionId).orElseThrow(/* ignore */);
+        if (!option.getQuestion().getId().equals(questionId)) {
+            return "redirect:/admin/quizzes/" + quizId + "/questions/" + questionId + "/options";
+        }
+        option.setCorrect(!option.isCorrect());
+        answerOptionRepository.save(option);
+        return "redirect:/admin/quizzes/" + quizId + "/questions/" + questionId + "/options";
+    }
+
+    @PostMapping("/{quizId}/questions/{questionId}/options/{optionId}/delete")
+    public String deleteOption(@PathVariable Long quizId,
+                               @PathVariable Long questionId,
+                               @PathVariable Long optionId) {
+        AnswerOption option = answerOptionRepository.findById(optionId).orElseThrow(/* ignore */);
+        if (!option.getQuestion().getId().equals(questionId)) {
+            return "redirect:/admin/quizzes/" + quizId + "/questions/" + questionId + "/options";
+        }
+        userAnswerRepository.deleteBySelectedOptionId(optionId);
+        answerOptionRepository.delete(option);
+        return "redirect:/admin/quizzes/" + quizId + "/questions/" + questionId + "/options";
+    }
+
+    @PostMapping("/{quizId}/questions/{questionId}/options/{optionId}/edit")
+    public String editOption(@PathVariable Long quizId,
+                             @PathVariable Long questionId,
+                             @PathVariable Long optionId,
+                             @RequestParam("text") String text) {
+        AnswerOption option = answerOptionRepository.findById(optionId).orElseThrow(/* ignore */);
+        if (!option.getQuestion().getId().equals(questionId)) {
+            return "redirect:/admin/quizzes/" + quizId + "/questions/" + questionId + "/options";
+        }
+        option.setText(text);
+        answerOptionRepository.save(option);
+        return "redirect:/admin/quizzes/" + quizId + "/questions/" + questionId + "/options";
+    }
+
+    @Transactional
+    @PostMapping("/{quizId}/questions/{questionId}/delete")
+    public String deleteQuestion(@PathVariable Long quizId, @PathVariable Long questionId) {
+        Question question = questionRepository.findById(questionId).orElseThrow(/* ignore */);
+        if (question.getQuiz().getId().equals(quizId)) {
+            userAnswerRepository.deleteByQuestionId(questionId);
+            questionRepository.delete(question);
+        }
+        return "redirect:/admin/quizzes/" + quizId + "/questions";
     }
 }

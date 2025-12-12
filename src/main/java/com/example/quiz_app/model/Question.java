@@ -74,4 +74,11 @@ public class Question {
     public void setOptions(List<AnswerOption> options) {
         this.options = options;
     }
+
+    public String getDisplayType() {
+        return switch (type) {
+            case MULTIPLE_CHOICE -> "Multiple";
+            case SINGLE_CHOICE -> "Single";
+        };
+    }
 }

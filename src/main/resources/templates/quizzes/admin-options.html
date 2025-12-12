@@ -10,7 +10,7 @@
             <h1 class="card-title mb-2">Manage Options</h1>
             <p class="font-medium" th:text="${question.text}">Question text</p>
             <p class="text-xs opacity-60 mt-1">
-                Type: <span th:text="${question.type}">SINGLE_CHOICE</span>
+                Type: <span th:text="${question.displayType}">Single</span>
             </p>
 
             <div class="mt-3 flex justify-between items-center text-sm opacity-70">
@@ -31,12 +31,24 @@
             </div>
 
             <ul th:if="${!#lists.isEmpty(question.options)}" class="space-y-2">
-                <li th:each="opt : ${question.options}" class="flex items-center gap-2">
-                    <span class="badge"
-                          th:classappend="${opt.correct} ? 'badge-success' : 'badge-ghost'">
-                        <span th:text="${opt.correct} ? 'Correct' : 'Incorrect'">Correct</span>
-                    </span>
-                    <span th:text="${opt.text}">Option text</span>
+                <li th:each="opt : ${question.options}" class="flex flex-wrap items-center gap-2">
+                    <form th:action="@{|/admin/quizzes/${quizId}/questions/${question.id}/options/${opt.id}/toggle|}" method="post">
+                        <button type="submit" class="badge border-0"
+                                th:classappend="${opt.correct} ? 'badge-success' : 'badge-ghost'">
+                            <span th:text="${opt.correct} ? 'Correct' : 'Incorrect'">Correct</span>
+                        </button>
+                    </form>
+                    <span class="flex-1" th:text="${opt.text}">Option text</span>
+                    <form th:action="@{|/admin/quizzes/${quizId}/questions/${question.id}/options/${opt.id}/edit|}" method="post"
+                          class="flex items-center gap-2">
+                        <input type="text" name="text" th:value="${opt.text}" class="input input-bordered input-xs"
+                               placeholder="Edit option" required>
+                        <button type="submit" class="btn btn-xs btn-outline">Save</button>
+                    </form>
+                    <form th:action="@{|/admin/quizzes/${quizId}/questions/${question.id}/options/${opt.id}/delete|}" method="post"
+                          onsubmit="return confirm('Delete this option?');">
+                        <button type="submit" class="btn btn-xs btn-error">Delete</button>
+                    </form>
                 </li>
             </ul>
         </div>
@@ -54,18 +66,18 @@
 
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text">Option text</span>
+                        <span class="label-text font-semibold text-base-content">Option text</span>
                     </label>
                     <input type="text"
                            th:field="*{text}"
-                           class="input input-bordered w-full"
+                           class="input input-bordered w-full bold"
                            placeholder="Option text"
                            required />
                 </div>
 
                 <div class="form-control">
                     <label class="label cursor-pointer flex justify-between">
-                        <span class="label-text">Is this answer correct?</span>
+                        <span class="label-text font-semibold text-base-content">Is this answer correct?</span>
                         <input type="checkbox"
                                th:field="*{correct}"
                                class="toggle toggle-success"
