@@ -8,9 +8,9 @@
     <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
             <h1 class="card-title mb-2">Manage Options</h1>
-            <p class="font-medium" th:text="${question.text}">Question text</p>
+            <p class="font-medium" id="question-text" th:text="${question.text}">Question text</p>
             <p class="text-xs opacity-60 mt-1">
-                Type: <span th:text="${question.displayType}">Single</span>
+                Type: <span id="question-type" th:text="${question.displayType}">Single</span>
             </p>
 
             <div class="mt-3 flex justify-between items-center text-sm opacity-70">
@@ -26,22 +26,22 @@
         <div class="card-body">
             <h2 class="card-title mb-3">Existing Options</h2>
 
-            <div th:if="${#lists.isEmpty(question.options)}" class="opacity-70">
+            <div id="no-options-message" th:if="${#lists.isEmpty(question.options)}" class="opacity-70">
                 No options yet. Add one below.
             </div>
 
-            <ul th:if="${!#lists.isEmpty(question.options)}" class="space-y-2">
-                <li th:each="opt : ${question.options}" class="flex flex-wrap items-center gap-2">
+            <ul id="options-list" th:unless="${#lists.isEmpty(question.options)}" class="space-y-2">
+                <li th:each="opt : ${question.options}" th:id="'option-' + ${opt.id}" class="flex flex-wrap items-center gap-2 option-item">
                     <form th:action="@{|/admin/quizzes/${quizId}/questions/${question.id}/options/${opt.id}/toggle|}" method="post">
-                        <button type="submit" class="badge border-0"
+                        <button type="submit" class="badge border-0 correctness-badge"
                                 th:classappend="${opt.correct} ? 'badge-success' : 'badge-ghost'">
-                            <span th:text="${opt.correct} ? 'Correct' : 'Incorrect'">Correct</span>
+                            <span class="correctness-text" th:text="${opt.correct} ? 'Correct' : 'Incorrect'">Correct</span>
                         </button>
                     </form>
-                    <span class="flex-1" th:text="${opt.text}">Option text</span>
+                    <span class="flex-1 option-text" th:text="${opt.text}">Option text</span>
                     <form th:action="@{|/admin/quizzes/${quizId}/questions/${question.id}/options/${opt.id}/edit|}" method="post"
                           class="flex items-center gap-2">
-                        <input type="text" name="text" th:value="${opt.text}" class="input input-bordered input-xs"
+                        <input type="text" name="text" th:value="${opt.text}" class="input input-bordered input-xs option-edit-input"
                                placeholder="Edit option" required>
                         <button type="submit" class="btn btn-xs btn-outline">Save</button>
                     </form>
@@ -50,6 +50,10 @@
                         <button type="submit" class="btn btn-xs btn-error">Delete</button>
                     </form>
                 </li>
+            </ul>
+
+            <!-- Empty list container for when there are no options initially -->
+            <ul id="options-list-empty" th:if="${#lists.isEmpty(question.options)}" class="space-y-2 hidden">
             </ul>
         </div>
     </div>
@@ -96,6 +100,150 @@
 </div>
 
 <footer th:replace="~{fragments :: dockNav}"></footer>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const quizId = /*[[${quizId}]]*/ 0;
+    const questionId = /*[[${question.id}]]*/ 0;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+        stompClient.debug = null; // Disable debug logs
+
+        stompClient.connect({}, function(frame) {
+            console.log('Connected to WebSocket');
+
+            // Subscribe to option updates for this question
+            stompClient.subscribe('/topic/question/' + questionId + '/options', function(message) {
+                const update = JSON.parse(message.body);
+                handleOptionUpdate(update);
+            });
+        }, function(error) {
+            console.error('WebSocket connection error:', error);
+        });
+    });
+
+    function handleOptionUpdate(update) {
+        switch(update.type) {
+            case 'OPTION_ADDED':
+                addOptionToList(update.data);
+                break;
+            case 'OPTION_UPDATED':
+                updateOptionInList(update.data);
+                break;
+            case 'OPTION_TOGGLED':
+                toggleOptionInList(update.data);
+                break;
+            case 'OPTION_DELETED':
+                removeOptionFromList(update.optionId);
+                break;
+        }
+    }
+
+    function addOptionToList(option) {
+        const optionsList = document.getElementById('options-list') || document.getElementById('options-list-empty');
+        const noOptionsMessage = document.getElementById('no-options-message');
+
+        // Check if option already exists
+        if (document.getElementById('option-' + option.id)) return;
+
+        // Hide "no options" message and show list
+        if (noOptionsMessage) noOptionsMessage.classList.add('hidden');
+        optionsList.classList.remove('hidden');
+
+        const optionHtml = createOptionHtml(option);
+        optionsList.insertAdjacentHTML('beforeend', optionHtml);
+
+        // Flash animation
+        const newOption = document.getElementById('option-' + option.id);
+        newOption.classList.add('animate-pulse');
+        setTimeout(() => newOption.classList.remove('animate-pulse'), 2000);
+    }
+
+    function updateOptionInList(option) {
+        const optionItem = document.getElementById('option-' + option.id);
+        if (!optionItem) return;
+
+        const textEl = optionItem.querySelector('.option-text');
+        const editInput = optionItem.querySelector('.option-edit-input');
+
+        if (textEl) textEl.textContent = option.text;
+        if (editInput) editInput.value = option.text;
+
+        // Flash animation
+        optionItem.classList.add('animate-pulse');
+        setTimeout(() => optionItem.classList.remove('animate-pulse'), 1500);
+    }
+
+    function toggleOptionInList(option) {
+        const optionItem = document.getElementById('option-' + option.id);
+        if (!optionItem) return;
+
+        const badge = optionItem.querySelector('.correctness-badge');
+        const badgeText = optionItem.querySelector('.correctness-text');
+
+        if (badge && badgeText) {
+            if (option.correct) {
+                badge.classList.remove('badge-ghost');
+                badge.classList.add('badge-success');
+                badgeText.textContent = 'Correct';
+            } else {
+                badge.classList.remove('badge-success');
+                badge.classList.add('badge-ghost');
+                badgeText.textContent = 'Incorrect';
+            }
+
+            // Flash animation
+            badge.classList.add('animate-pulse');
+            setTimeout(() => badge.classList.remove('animate-pulse'), 1500);
+        }
+    }
+
+    function removeOptionFromList(optionId) {
+        const optionItem = document.getElementById('option-' + optionId);
+        if (optionItem) {
+            optionItem.classList.add('opacity-50');
+            setTimeout(() => {
+                optionItem.remove();
+
+                // Show "no options" message if list is empty
+                const optionsList = document.getElementById('options-list');
+                const noOptionsMessage = document.getElementById('no-options-message');
+                if (optionsList && optionsList.children.length === 0 && noOptionsMessage) {
+                    noOptionsMessage.classList.remove('hidden');
+                }
+            }, 300);
+        }
+    }
+
+    function createOptionHtml(option) {
+        const badgeClass = option.correct ? 'badge-success' : 'badge-ghost';
+        const badgeText = option.correct ? 'Correct' : 'Incorrect';
+
+        return `
+            <li id="option-${option.id}" class="flex flex-wrap items-center gap-2 option-item">
+                <form action="/admin/quizzes/${quizId}/questions/${questionId}/options/${option.id}/toggle" method="post">
+                    <button type="submit" class="badge border-0 correctness-badge ${badgeClass}">
+                        <span class="correctness-text">${badgeText}</span>
+                    </button>
+                </form>
+                <span class="flex-1 option-text">${option.text}</span>
+                <form action="/admin/quizzes/${quizId}/questions/${questionId}/options/${option.id}/edit" method="post"
+                      class="flex items-center gap-2">
+                    <input type="text" name="text" value="${option.text}" class="input input-bordered input-xs option-edit-input"
+                           placeholder="Edit option" required>
+                    <button type="submit" class="btn btn-xs btn-outline">Save</button>
+                </form>
+                <form action="/admin/quizzes/${quizId}/questions/${questionId}/options/${option.id}/delete" method="post"
+                      onsubmit="return confirm('Delete this option?');">
+                    <button type="submit" class="btn btn-xs btn-error">Delete</button>
+                </form>
+            </li>
+        `;
+    }
+    /*]]>*/
+</script>
 
 </body>
 </html>

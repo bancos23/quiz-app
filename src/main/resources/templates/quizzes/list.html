@@ -19,34 +19,38 @@
     </div>
 
     <!-- If no quizzes -->
-    <div th:if="${#lists.isEmpty(quizzes)}" class="text-center opacity-70 mt-20">
+    <div id="no-quizzes-message" th:if="${#lists.isEmpty(quizzes)}" class="text-center opacity-70 mt-20">
         <p>No quizzes available.</p>
     </div>
 
     <!-- Quiz List -->
-    <div class="grid gap-4" th:if="${!#lists.isEmpty(quizzes)}">
+    <div id="quiz-list" class="grid gap-4" th:classappend="${#lists.isEmpty(quizzes)} ? 'hidden' : ''">
 
-        <div th:each="quiz : ${quizzes}" class="card bg-base-100 shadow-xl">
+        <div th:each="quiz : ${quizzes}" th:id="'quiz-' + ${quiz.id}" class="card bg-base-100 shadow-xl quiz-card">
             <div class="card-body">
 
                 <!-- Title + Draft Badge -->
                 <div class="flex items-center gap-2">
-                    <h2 class="card-title" th:text="${quiz.title}">Quiz Title</h2>
+                    <h2 class="card-title quiz-title" th:text="${quiz.title}">Quiz Title</h2>
 
-                    <span th:if="${!quiz.published}"
-                          class="badge badge-warning badge-outline text-xs">
+                    <span th:unless="${quiz.published}"
+                          class="badge badge-warning badge-outline text-xs quiz-status-badge">
                         Draft
+                    </span>
+                    <span th:if="${quiz.published}"
+                          class="badge badge-success badge-outline text-xs quiz-status-badge hidden">
+                        Published
                     </span>
                 </div>
 
-                <p class="opacity-70 text-sm" th:text="${quiz.description}">
+                <p class="opacity-70 text-sm quiz-description" th:text="${quiz.description}">
                     Quiz description...
                 </p>
 
                 <div class="flex justify-between items-center mt-4">
 
                     <!-- Left side: creator (if exists) -->
-                    <div class="text-xs opacity-60" th:if="${quiz.createdBy != null}">
+                    <div class="text-xs opacity-60 quiz-creator" th:if="${quiz.createdBy != null}">
                         Created by:
                         <span th:text="${quiz.createdBy.username}">creator</span>
                     </div>
@@ -57,14 +61,14 @@
                         <!-- Everyone can take published quizzes -->
                         <a th:if="${quiz.published}"
                            th:href="@{|/quizzes/${quiz.id}|}"
-                           class="btn btn-primary btn-sm">
+                           class="btn btn-primary btn-sm take-quiz-btn">
                             Take Quiz
                         </a>
 
                         <!-- Admin can take drafts too -->
                         <a th:if="${!quiz.published} and (${isAdmin} == true)"
                            th:href="@{|/quizzes/${quiz.id}|}"
-                           class="btn btn-secondary btn-sm">
+                           class="btn btn-secondary btn-sm preview-btn">
                             Preview
                         </a>
 
@@ -86,5 +90,179 @@
 </div>
 
 <footer th:replace="~{fragments :: dockNav}"></footer>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const isAdmin = /*[[${isAdmin}]]*/ false;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+        stompClient.debug = null; // Disable debug logs
+
+        stompClient.connect({}, function(frame) {
+            console.log('Connected to WebSocket');
+
+            // Subscribe to quiz updates
+            stompClient.subscribe('/topic/quizzes', function(message) {
+                const update = JSON.parse(message.body);
+                handleQuizUpdate(update);
+            });
+        }, function(error) {
+            console.error('WebSocket connection error:', error);
+        });
+    });
+
+    function handleQuizUpdate(update) {
+        const quizList = document.getElementById('quiz-list');
+        const noQuizzesMessage = document.getElementById('no-quizzes-message');
+
+        switch(update.type) {
+            case 'QUIZ_CREATED':
+                addQuizToList(update.data);
+                break;
+            case 'QUIZ_UPDATED':
+            case 'QUIZ_PUBLISHED':
+                updateQuizInList(update.data);
+                break;
+            case 'QUIZ_DELETED':
+                removeQuizFromList(update.quizId);
+                break;
+        }
+
+        // Show/hide no quizzes message
+        const quizCards = quizList.querySelectorAll('.quiz-card');
+        if (quizCards.length === 0) {
+            noQuizzesMessage.classList.remove('hidden');
+            quizList.classList.add('hidden');
+        } else {
+            noQuizzesMessage.classList.add('hidden');
+            quizList.classList.remove('hidden');
+        }
+    }
+
+    function addQuizToList(quiz) {
+        // Only show published quizzes for non-admins
+        if (!isAdmin && !quiz.published) return;
+
+        const quizList = document.getElementById('quiz-list');
+        const existingQuiz = document.getElementById('quiz-' + quiz.id);
+        if (existingQuiz) return; // Already exists
+
+        const quizHtml = createQuizCardHtml(quiz);
+        quizList.insertAdjacentHTML('afterbegin', quizHtml);
+
+        // Flash animation
+        const newCard = document.getElementById('quiz-' + quiz.id);
+        newCard.classList.add('animate-pulse');
+        setTimeout(() => newCard.classList.remove('animate-pulse'), 2000);
+    }
+
+    function updateQuizInList(quiz) {
+        const quizCard = document.getElementById('quiz-' + quiz.id);
+
+        // If quiz doesn't exist and should be shown, add it
+        if (!quizCard) {
+            if (isAdmin || quiz.published) {
+                addQuizToList(quiz);
+            }
+            return;
+        }
+
+        // If non-admin and quiz is now unpublished, remove it
+        if (!isAdmin && !quiz.published) {
+            quizCard.remove();
+            return;
+        }
+
+        // Update existing card
+        const titleEl = quizCard.querySelector('.quiz-title');
+        const descEl = quizCard.querySelector('.quiz-description');
+        const badgeEl = quizCard.querySelector('.quiz-status-badge');
+        const takeBtn = quizCard.querySelector('.take-quiz-btn');
+        const previewBtn = quizCard.querySelector('.preview-btn');
+
+        if (titleEl) titleEl.textContent = quiz.title;
+        if (descEl) descEl.textContent = quiz.description || '';
+
+        // Update status badge
+        if (badgeEl) {
+            if (quiz.published) {
+                badgeEl.textContent = 'Published';
+                badgeEl.classList.remove('badge-warning', 'hidden');
+                badgeEl.classList.add('badge-success');
+            } else {
+                badgeEl.textContent = 'Draft';
+                badgeEl.classList.remove('badge-success', 'hidden');
+                badgeEl.classList.add('badge-warning');
+            }
+        }
+
+        // Update buttons visibility
+        if (quiz.published) {
+            if (takeBtn) takeBtn.classList.remove('hidden');
+            if (previewBtn) previewBtn.classList.add('hidden');
+        } else {
+            if (takeBtn) takeBtn.classList.add('hidden');
+            if (previewBtn && isAdmin) previewBtn.classList.remove('hidden');
+        }
+
+        // Flash animation
+        quizCard.classList.add('animate-pulse');
+        setTimeout(() => quizCard.classList.remove('animate-pulse'), 1500);
+    }
+
+    function removeQuizFromList(quizId) {
+        const quizCard = document.getElementById('quiz-' + quizId);
+        if (quizCard) {
+            quizCard.classList.add('opacity-50');
+            setTimeout(() => quizCard.remove(), 300);
+        }
+    }
+
+    function createQuizCardHtml(quiz) {
+        const statusBadge = quiz.published
+            ? ''
+            : '<span class="badge badge-warning badge-outline text-xs quiz-status-badge">Draft</span>';
+
+        const takeBtn = quiz.published
+            ? `<a href="/quizzes/${quiz.id}" class="btn btn-primary btn-sm take-quiz-btn">Take Quiz</a>`
+            : '';
+
+        const previewBtn = (!quiz.published && isAdmin)
+            ? `<a href="/quizzes/${quiz.id}" class="btn btn-secondary btn-sm preview-btn">Preview</a>`
+            : '';
+
+        const editBtn = isAdmin
+            ? `<a href="/admin/quizzes/${quiz.id}/questions" class="btn btn-ghost btn-sm">Edit</a>`
+            : '';
+
+        const creatorHtml = quiz.createdByUsername
+            ? `<div class="text-xs opacity-60 quiz-creator">Created by: <span>${quiz.createdByUsername}</span></div>`
+            : '';
+
+        return `
+            <div id="quiz-${quiz.id}" class="card bg-base-100 shadow-xl quiz-card">
+                <div class="card-body">
+                    <div class="flex items-center gap-2">
+                        <h2 class="card-title quiz-title">${quiz.title}</h2>
+                        ${statusBadge}
+                    </div>
+                    <p class="opacity-70 text-sm quiz-description">${quiz.description || ''}</p>
+                    <div class="flex justify-between items-center mt-4">
+                        ${creatorHtml}
+                        <div class="card-actions">
+                            ${takeBtn}
+                            ${previewBtn}
+                            ${editBtn}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    /*]]>*/
+</script>
+
 </body>
 </html>

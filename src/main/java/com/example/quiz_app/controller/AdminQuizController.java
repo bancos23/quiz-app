@@ -7,6 +7,7 @@ import com.example.quiz_app.repository.AnswerOptionRepository;
 import com.example.quiz_app.repository.QuestionRepository;
 import com.example.quiz_app.repository.QuizRepository;
 import com.example.quiz_app.repository.UserAnswerRepository;
+import com.example.quiz_app.service.QuizNotificationService;
 import com.example.quiz_app.service.QuizService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.constraints.NotBlank;
@@ -28,13 +29,17 @@ public class AdminQuizController {
     private final AnswerOptionRepository answerOptionRepository;
     private final QuizRepository quizRepository;
     private final UserAnswerRepository userAnswerRepository;
+    private final QuizNotificationService notificationService;
 
-    public AdminQuizController(QuizService quizService, QuestionRepository questionRepository, AnswerOptionRepository answerOptionRepository, QuizRepository quizRepository, UserAnswerRepository userAnswerRepository) {
+    public AdminQuizController(QuizService quizService, QuestionRepository questionRepository,
+                               AnswerOptionRepository answerOptionRepository, QuizRepository quizRepository,
+                               UserAnswerRepository userAnswerRepository, QuizNotificationService notificationService) {
         this.quizService = quizService;
         this.questionRepository = questionRepository;
         this.answerOptionRepository = answerOptionRepository;
         this.quizRepository = quizRepository;
         this.userAnswerRepository = userAnswerRepository;
+        this.notificationService = notificationService;
     }
 
     public static class QuizForm {
@@ -137,7 +142,8 @@ public class AdminQuizController {
 
         Long userId = (Long) session.getAttribute("userId");
 
-        quizService.createQuiz(form.getTitle(), form.getDescription(), form.isPublished(), userId);
+        Quiz quiz = quizService.createQuiz(form.getTitle(), form.getDescription(), form.isPublished(), userId);
+        notificationService.notifyQuizCreated(quiz);
 
         return "redirect:/quizzes";
     }
@@ -159,7 +165,8 @@ public class AdminQuizController {
         }
 
         Question.QuestionType type = Question.QuestionType.valueOf(form.getType());
-        quizService.addQuestionToQuiz(quizId, form.getText(), type);
+        Question question = quizService.addQuestionToQuiz(quizId, form.getText(), type);
+        notificationService.notifyQuestionAdded(question);
 
         return "redirect:/admin/quizzes/" + quizId + "/questions";
     }
@@ -191,6 +198,7 @@ public class AdminQuizController {
         opt.setCorrect(form.isCorrect());
 
         answerOptionRepository.save(opt);
+        notificationService.notifyOptionAdded(opt, quizId);
 
         return "redirect:/admin/quizzes/" + quizId + "/questions/" + questionId + "/options";
     }
@@ -200,6 +208,7 @@ public class AdminQuizController {
         Quiz quiz = quizRepository.findById(quizId).orElseThrow();
         quiz.setPublished(!quiz.isPublished());
         quizRepository.save(quiz);
+        notificationService.notifyQuizPublishToggled(quiz);
         return "redirect:/admin/quizzes/" + quizId + "/questions";
     }
 
@@ -213,6 +222,7 @@ public class AdminQuizController {
         }
         option.setCorrect(!option.isCorrect());
         answerOptionRepository.save(option);
+        notificationService.notifyOptionToggled(option, quizId);
         return "redirect:/admin/quizzes/" + quizId + "/questions/" + questionId + "/options";
     }
 
@@ -226,6 +236,7 @@ public class AdminQuizController {
         }
         userAnswerRepository.deleteBySelectedOptionId(optionId);
         answerOptionRepository.delete(option);
+        notificationService.notifyOptionDeleted(quizId, questionId, optionId);
         return "redirect:/admin/quizzes/" + quizId + "/questions/" + questionId + "/options";
     }
 
@@ -240,6 +251,7 @@ public class AdminQuizController {
         }
         option.setText(text);
         answerOptionRepository.save(option);
+        notificationService.notifyOptionUpdated(option, quizId);
         return "redirect:/admin/quizzes/" + quizId + "/questions/" + questionId + "/options";
     }
 
@@ -250,6 +262,7 @@ public class AdminQuizController {
         if (question.getQuiz().getId().equals(quizId)) {
             userAnswerRepository.deleteByQuestionId(questionId);
             questionRepository.delete(question);
+            notificationService.notifyQuestionDeleted(quizId, questionId);
         }
         return "redirect:/admin/quizzes/" + quizId + "/questions";
     }
