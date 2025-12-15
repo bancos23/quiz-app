@@ -8,6 +8,7 @@ import com.example.quiz_app.dto.QuizUpdateMessage.UpdateType;
 import com.example.quiz_app.model.AnswerOption;
 import com.example.quiz_app.model.Question;
 import com.example.quiz_app.model.Quiz;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ public class QuizNotificationService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
+    @Autowired
     public QuizNotificationService(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
     }

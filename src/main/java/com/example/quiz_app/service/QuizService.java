@@ -2,6 +2,7 @@ package com.example.quiz_app.service;
 
 import com.example.quiz_app.model.*;
 import com.example.quiz_app.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ public class QuizService {
     private final QuestionRepository questionRepository;
     private final AnswerOptionRepository answerOptionRepository;
 
+    @Autowired
     public QuizService(QuizRepository quizRepository,
                        UserRepository userRepository,
                        QuizAttemptRepository quizAttemptRepository,

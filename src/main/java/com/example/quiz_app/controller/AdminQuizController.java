@@ -12,6 +12,7 @@ import com.example.quiz_app.service.QuizService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -31,6 +32,7 @@ public class AdminQuizController {
     private final UserAnswerRepository userAnswerRepository;
     private final QuizNotificationService notificationService;
 
+    @Autowired
     public AdminQuizController(QuizService quizService, QuestionRepository questionRepository,
                                AnswerOptionRepository answerOptionRepository, QuizRepository quizRepository,
                                UserAnswerRepository userAnswerRepository, QuizNotificationService notificationService) {
